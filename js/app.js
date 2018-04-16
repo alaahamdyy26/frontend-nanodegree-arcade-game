@@ -1,42 +1,34 @@
-// Enemies our player must avoid
-function getRandomNum(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-var Enemy = function (x = 0, y = 0) {
-  // TODO
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
-
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
+const Enemy = function (x = 0, y = 0, minSpeed = 150, maxSpeed = 350) {
   this.sprite = 'images/enemy-bug.png';
   this.x = x;
   this.y = y;
-  this.speed = getRandomNum(120, 360);
+  this.minSpeed = minSpeed;
+  this.maxSpeed = maxSpeed;
+  this.speed = this.generateSpeed();
 
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+//getting a random number for speed
+Enemy.prototype.generateSpeed = function () {
+  const min = Math.ceil(this.minSpeed);
+  const max = Math.floor(this.maxSpeed);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+// Update the enemy's position
 Enemy.prototype.reset = function () {
   this.x = -65;
-  this.speed = getRandomNum(120, 360);
+  this.speed = this.generateSpeed()
 };
 Enemy.prototype.update = function (dt) {
-  // TODO:DONE
-  // You should multiply any movement by the dt parameter
-  // which will ensure the game runs at the same speed for
-  // all computers.
   if (this.x >= 650) {
     this.reset();
   }
-  this.x += this.speed * dt;
+  this.x += this.speed * dt; //multiplying by dt to ensure the game runs at the same speed for all computers.
 };
+
+//checking bugs' and player's positions to determine collision
 Enemy.prototype.isCollidingWith = function (x, y) {
-  if (this.x < x + 60 && this.x > x - 60 && this.y < y + 60 && this.y > y - 60) {
+  if (this.x < x + charWidth && this.x > x - charWidth && this.y < y + charWidth && this.y > y - charWidth) {
     gameResult.lostGame();
     return true;
   }
@@ -47,16 +39,14 @@ Enemy.prototype.render = function () {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// TODO
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+
 function Player() {
   this.sprite = 'images/char-boy.png';
   this.x = startPlayerX;
   this.y = startPlayerY;
 }
 
+//resetting the player position
 Player.prototype.reset = function () {
   this.x = startPlayerX;
   this.y = startPlayerY;
@@ -71,18 +61,19 @@ Player.prototype.update = function () {
   gameResult.winGame();
 };
 
+//moving the player on press.
 Player.prototype.handleInput = function (press) {
   if (press === 'left' && this.x > 0) {
-    this.x -= 101;
+    this.x -= canvas.cellWidth;
   }
-  else if (press === 'right' && this.x < 400) {
-    this.x += 101;
+  else if (press === 'right' && this.x < canvas.width) {
+    this.x += canvas.cellWidth;
   }
   else if (press === 'up' && this.y > 0) {
-    this.y -= 83;
+    this.y -= canvas.cellHeight;
   }
-  else if (press === 'down' && this.y < 480) {
-    this.y += 83;
+  else if (press === 'down' && this.y < canvas.height) {
+    this.y += canvas.cellHeight;
   }
 
 };
@@ -99,12 +90,13 @@ function resetGame() {
 }
 
 //keeping track of score.
-var Score = function (score) {
+const Score = function (score) {
   this.score = score;
+
 };
 //adds win method to Score
 Score.prototype.winGame = function () {
-  if (player.y <= -18) {
+  if (player.y <= 0) {
     if (isNaN(parseInt(this.score.innerText))) {
       this.score.innerText = 0;
     }
@@ -127,17 +119,24 @@ Score.prototype.lostGame = function () {
 
 const startPlayerX = 200,
       startPlayerY = 480,
-      gameResult = new Score(document.querySelector('.score'));
-
+      gameResult = new Score(document.querySelector('.score')),
+      canvas = {
+      width: 400,
+      height: 480,
+      cellWidth: 101,
+      cellHeight: 83
+    },
+      charWidth = 60,
+      firstBugY = 65;
 
 //enemy objects
-const allEnemies = [new Enemy(-70, 65), new Enemy(-160, 148), new Enemy(-128, 228), new Enemy(-300, 311)];
+const allEnemies = [new Enemy(-70, firstBugY ), new Enemy(-160, firstBugY  + canvas.cellHeight), new Enemy(-128, firstBugY  + (canvas.cellHeight * 2)), new Enemy(-300, firstBugY  + (canvas.cellHeight *3))];
 
 //the player object
-var player = new Player();
+const player = new Player();
 // This listens for key presses and sends the keys to Player.handleInput() method.
 document.addEventListener('keyup', function (e) {
-  var allowedKeys = {
+  const allowedKeys = {
     37: 'left',
     38: 'up',
     39: 'right',
@@ -146,5 +145,6 @@ document.addEventListener('keyup', function (e) {
 
   player.handleInput(allowedKeys[e.keyCode]);
 });
+
 
 
