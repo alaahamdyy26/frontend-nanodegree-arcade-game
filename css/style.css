@@ -1,3 +1,13 @@
 body {
     text-align: center;
 }
+.scorePanel{
+    font-weight: bold;
+    width: 100%;
+    letter-spacing: px;
+   font-size: 30px;
+
+}
+.scorePanel span{
+    color: red;
+}
