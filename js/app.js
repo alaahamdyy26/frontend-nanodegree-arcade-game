@@ -84,9 +84,7 @@ Player.prototype.render = function () {
 //this resets both player and enemies
 function resetGame() {
   player.reset();
-  allEnemies.forEach(function (x) {
-    x.reset();
-  });
+  
 }
 
 //keeping track of score.
